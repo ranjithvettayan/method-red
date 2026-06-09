@@ -1,0 +1,63 @@
+<!-- Stats Cards Partial -->
+{% set stats = stats if stats is defined else stats_30d %}
+{% set period_label = "Last " ~ (days if days is defined else 30) ~ " days" %}
+
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Total Requests</p>
+            <p class="text-2xl font-bold text-gray-900">{{ "{:,}".format(stats.get('total_requests', 0)|int) }}</p>
+            <p class="text-xs text-gray-400">{{ period_label }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Successful</p>
+            <p class="text-2xl font-bold text-green-600">{{ "{:,}".format(stats.get('successful_requests', 0)|int) }}</p>
+            <p class="text-xs text-gray-400">{{ period_label }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Total Tokens</p>
+            <p class="text-2xl font-bold text-gray-900">{{ "{:,}".format(stats.get('total_tokens', 0)|int) }}</p>
+            <p class="text-xs text-gray-400">{{ period_label }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Total Cost</p>
+            <p class="text-2xl font-bold text-gray-900">${{ "%.6f"|format(stats.get('total_cost', 0)) }}</p>
+            <p class="text-xs text-gray-400">{{ period_label }}</p>
+        </div>
+    </div>
+</div>

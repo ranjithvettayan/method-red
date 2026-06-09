@@ -1,0 +1,73 @@
+<div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+        <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                Team Members
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                {{ team.members|length if team.members else 0 }} agents in this team
+            </p>
+        </div>
+    </div>
+    
+    <div class="border-t border-gray-200">
+        {% if team.members %}
+        <ul role="list" class="divide-y divide-gray-200">
+            {% for member in team.members %}
+            <li class="px-4 py-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-xl mr-3">🧠</span>
+                        <div>
+                            <p class="text-sm font-medium text-indigo-600">
+                                <a href="/ui/agents/{{ member.id }}">{{ member.name }}</a>
+                            </p>
+                            <p class="text-sm text-gray-500">{{ member.role }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            Position {{ member.position }}
+                        </span>
+                        <button hx-delete="/ui/htmx/teams/{{ team.id }}/members/{{ member.id }}"
+                                hx-target="#members-section"
+                                hx-swap="innerHTML"
+                                hx-confirm="Remove this agent from the team?"
+                                class="text-red-600 hover:text-red-900 text-sm">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="px-4 py-8 text-center text-gray-500">
+            <p>No members in this team yet.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Add Member Form -->
+    <div class="px-4 py-4 sm:px-6 bg-gray-50 border-t">
+        <form hx-post="/ui/htmx/teams/{{ team.id }}/members"
+              hx-target="#members-section"
+              hx-swap="innerHTML"
+              class="flex items-center space-x-4">
+            <div class="flex-1">
+                <label for="agent_id" class="sr-only">Add agent</label>
+                <select name="agent_id" id="agent_id" required
+                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="">Select an agent to add...</option>
+                    {% for agent in available_agents %}
+                    <option value="{{ agent.id }}">{{ agent.name or agent.role or agent.id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Add Member
+            </button>
+        </form>
+    </div>
+</div>

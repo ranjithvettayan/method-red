@@ -1,0 +1,27 @@
+title: AATMF T7 - Data Exfiltration via Model Output
+id: aatmf-t7-001
+status: experimental
+description: Detects patterns of sensitive data appearing in model outputs
+author: SnailSploit
+date: 2026/02/10
+references:
+    - https://github.com/snailsploit/aatmf
+tags:
+    - attack.exfiltration
+    - aatmf.t7
+logsource:
+    category: ai_output_monitor
+detection:
+    selection_pii:
+        output.text|re:
+            - '\b\d{3}-\d{2}-\d{4}\b'  # SSN
+            - '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'  # Email
+            - '\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'  # Credit card
+    selection_secrets:
+        output.text|contains:
+            - 'BEGIN RSA PRIVATE KEY'
+            - 'BEGIN OPENSSH PRIVATE KEY'
+            - 'AKIA'  # AWS access key prefix
+            - 'sk-'   # API key prefix
+    condition: selection_pii OR selection_secrets
+level: critical

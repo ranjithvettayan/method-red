@@ -1,0 +1,24 @@
+services:
+  red-team-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: red-team-mcp
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist database
+      - ./data:/app/data
+      # Mount config for customization (optional)
+      - ./config:/app/config:ro
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

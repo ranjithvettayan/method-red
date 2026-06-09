@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D1B2A"/>
+      <stop offset="100%" style="stop-color:#1B2838"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2E86AB"/>
+      <stop offset="100%" style="stop-color:#4ECDC4"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="200" fill="url(#bg)" rx="8"/>
+  <rect x="0" y="190" width="800" height="10" fill="url(#accent)" rx="0 0 8 8"/>
+  <!-- Grid pattern -->
+  <g opacity="0.05" stroke="#4ECDC4" stroke-width="0.5">
+    <line x1="0" y1="40" x2="800" y2="40"/>
+    <line x1="0" y1="80" x2="800" y2="80"/>
+    <line x1="0" y1="120" x2="800" y2="120"/>
+    <line x1="0" y1="160" x2="800" y2="160"/>
+    <line x1="100" y1="0" x2="100" y2="200"/>
+    <line x1="200" y1="0" x2="200" y2="200"/>
+    <line x1="300" y1="0" x2="300" y2="200"/>
+    <line x1="400" y1="0" x2="400" y2="200"/>
+    <line x1="500" y1="0" x2="500" y2="200"/>
+    <line x1="600" y1="0" x2="600" y2="200"/>
+    <line x1="700" y1="0" x2="700" y2="200"/>
+  </g>
+  <!-- Shield icon -->
+  <g transform="translate(80, 55)">
+    <path d="M45 0 L90 20 L90 55 C90 82 68 100 45 110 C22 100 0 82 0 55 L0 20 Z" fill="none" stroke="#2E86AB" stroke-width="2.5" opacity="0.9"/>
+    <path d="M45 15 L75 30 L75 55 C75 72 60 85 45 92 C30 85 15 72 15 55 L15 30 Z" fill="#2E86AB" opacity="0.15"/>
+    <text x="45" y="65" text-anchor="middle" fill="#4ECDC4" font-family="monospace" font-size="28" font-weight="bold">AI</text>
+  </g>
+  <!-- Title -->
+  <text x="200" y="75" fill="#E8E8E8" font-family="'Segoe UI', system-ui, sans-serif" font-size="42" font-weight="700" letter-spacing="2">AATMF</text>
+  <text x="200" y="110" fill="#8899AA" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" letter-spacing="1">ADVERSARIAL AI THREAT MODELING FRAMEWORK</text>
+  <!-- Version badge -->
+  <rect x="200" y="125" width="52" height="22" rx="4" fill="#2E86AB"/>
+  <text x="226" y="140" text-anchor="middle" fill="#FFFFFF" font-family="monospace" font-size="12" font-weight="bold">v3</text>
+  <!-- Stats -->
+  <text x="270" y="140" fill="#667788" font-family="monospace" font-size="11">15 TACTICS</text>
+  <text x="390" y="140" fill="#667788" font-family="monospace" font-size="11">240 TECHNIQUES</text>
+  <text x="540" y="140" fill="#667788" font-family="monospace" font-size="11">2,152+ PROCEDURES</text>
+  <!-- Dots separator -->
+  <circle cx="375" cy="137" r="2" fill="#2E86AB"/>
+  <circle cx="525" cy="137" r="2" fill="#2E86AB"/>
+  <!-- Author -->
+  <text x="700" y="170" text-anchor="middle" fill="#556677" font-family="monospace" font-size="10">by SnailSploit</text>
+</svg>

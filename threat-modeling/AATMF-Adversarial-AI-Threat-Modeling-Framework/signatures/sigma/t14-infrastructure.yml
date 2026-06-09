@@ -1,0 +1,39 @@
+title: AATMF T14 - AI Infrastructure Exploitation
+id: aatmf-t14-001
+status: experimental
+description: Detects exploitation attempts against AI inference infrastructure
+author: SnailSploit
+date: 2026/02/10
+references:
+    - https://github.com/snailsploit/aatmf
+    - CVE-2025-30165
+    - CVE-2025-23254
+tags:
+    - attack.initial_access
+    - aatmf.t14
+logsource:
+    category: network
+detection:
+    selection_zmq:
+        dst_port|contains:
+            - 5555
+            - 5556
+            - 5557
+        protocol: 'tcp'
+    selection_triton:
+        dst_port: 8000
+        http.url|contains:
+            - '/v2/models'
+            - '/v2/repository'
+    selection_vllm:
+        dst_port: 8000
+        http.url|contains:
+            - '/v1/completions'
+        http.body|contains:
+            - 'pickle'
+            - '__reduce__'
+    condition: selection_zmq OR selection_triton OR selection_vllm
+level: high
+falsepositives:
+    - Legitimate inference traffic
+    - Health checks

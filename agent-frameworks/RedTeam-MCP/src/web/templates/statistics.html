@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - Red Team MCP{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Usage Statistics</h1>
+            <p class="text-gray-500 mt-1">Track API usage, costs, and model performance</p>
+        </div>
+        <div class="flex gap-2">
+            <select id="time-period" class="border rounded-lg px-3 py-2 text-sm">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+            </select>
+            <button 
+                onclick="refreshStats()"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Overview Cards -->
+    <div id="stats-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {% include "statistics/_stats_cards.html" with context %}
+    </div>
+
+    <!-- Cost Summary -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Cost Breakdown -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Cost Breakdown (30 days)</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Input Tokens</p>
+                            <p class="text-sm text-gray-500">{{ "{:,}".format(cost_summary.get('total_input_tokens', 0)|int) }} tokens</p>
+                        </div>
+                    </div>
+                    <p class="text-lg font-semibold text-gray-900">${{ "%.6f"|format(cost_summary.get('total_input_cost', 0)) }}</p>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">Output Tokens</p>
+                            <p class="text-sm text-gray-500">{{ "{:,}".format(cost_summary.get('total_output_tokens', 0)|int) }} tokens</p>
+                        </div>
+                    </div>
+                    <p class="text-lg font-semibold text-gray-900">${{ "%.6f"|format(cost_summary.get('total_output_cost', 0)) }}</p>
+                </div>
+                <div class="border-t pt-4">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-900">Total Cost</p>
+                        <p class="text-2xl font-bold text-blue-600">${{ "%.6f"|format(cost_summary.get('total_cost', 0)) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Rate -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Request Status (30 days)</h2>
+            <div class="space-y-4">
+                {% set total_requests = stats_30d.get('total_requests', 0) %}
+                {% set successful = stats_30d.get('successful_requests', 0) %}
+                {% set failed = stats_30d.get('failed_requests', 0) %}
+                {% set success_rate = ((successful / total_requests * 100) if total_requests > 0 else 0) %}
+                
+                {% set fail_rate = (100 - success_rate) if total_requests > 0 else 0 %}
+                <div class="relative pt-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-green-600">Successful</span>
+                        <span class="text-sm font-medium text-green-600">{{ successful }}</span>
+                    </div>
+                    <div class="overflow-hidden h-3 text-xs flex rounded-full bg-gray-200">
+                        <div class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 transition-all duration-500" data-width="{{ success_rate|int }}"></div>
+                    </div>
+                </div>
+                
+                <div class="relative pt-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-red-600">Failed</span>
+                        <span class="text-sm font-medium text-red-600">{{ failed }}</span>
+                    </div>
+                    <div class="overflow-hidden h-3 text-xs flex rounded-full bg-gray-200">
+                        <div class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 transition-all duration-500" data-width="{{ fail_rate|int }}"></div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="text-center">
+                        <p class="text-4xl font-bold {% if success_rate >= 95 %}text-green-600{% elif success_rate >= 80 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                            {{ "%.1f"|format(success_rate) }}%
+                        </p>
+                        <p class="text-sm text-gray-500 mt-1">Success Rate</p>
+                    </div>
+                </div>
+
+                <div class="text-center text-sm text-gray-500">
+                    Average Response Time: <span class="font-medium text-gray-900">{{ "%.0f"|format(stats_30d.get('avg_response_time', 0)) }}ms</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Breakdown -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Usage by Model</h2>
+        <div id="model-breakdown">
+            {% include "statistics/_model_breakdown.html" with context %}
+        </div>
+    </div>
+
+    <!-- Recent Usage History -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Recent Requests</h2>
+            <button
+                hx-get="/ui/htmx/statistics/history?days=7&limit=100"
+                hx-target="#history-table"
+                hx-swap="innerHTML"
+                class="text-sm text-blue-600 hover:text-blue-800"
+            >
+                Load More
+            </button>
+        </div>
+        <div id="history-table">
+            {% include "statistics/_history_table.html" with context %}
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshStats() {
+    const days = document.getElementById('time-period').value;
+    htmx.ajax('GET', `/ui/htmx/statistics/refresh?days=${days}`, '#stats-cards');
+    htmx.ajax('GET', `/ui/htmx/statistics/models?days=${days}`, '#model-breakdown');
+    htmx.ajax('GET', `/ui/htmx/statistics/history?days=${days}`, '#history-table');
+}
+
+// Set progress bar widths from data attributes
+document.querySelectorAll('.progress-bar[data-width]').forEach(function(bar) {
+    bar.style.width = bar.dataset.width + '%';
+});
+</script>
+{% endblock %}

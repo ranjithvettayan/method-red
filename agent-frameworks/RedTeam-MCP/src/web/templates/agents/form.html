@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}{{ agent.name if agent else 'New Agent' }} - Red Team MCP{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="md:grid md:grid-cols-3 md:gap-6">
+        <div class="md:col-span-1">
+            <div class="px-4 sm:px-0">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">
+                    {% if is_new %}Create Agent{% else %}Edit Agent{% endif %}
+                </h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    Configure your AI agent's settings and personality.
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-5 md:mt-0 md:col-span-2">
+            <form hx-{{ 'post' if is_new else 'put' }}="/ui/htmx/agents{% if not is_new %}/{{ agent.id }}{% endif %}"
+                  hx-target="#form-result"
+                  hx-swap="innerHTML">
+                <div class="shadow sm:rounded-md sm:overflow-hidden">
+                    <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                        
+                        {% if is_new %}
+                        <div>
+                            <label for="id" class="block text-sm font-medium text-gray-700">
+                                Agent ID
+                            </label>
+                            <input type="text" name="id" id="id" required
+                                   pattern="[a-z0-9_-]+"
+                                   class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                   placeholder="my_agent">
+                            <p class="mt-1 text-sm text-gray-500">Lowercase letters, numbers, underscores, and hyphens only.</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">
+                                Name
+                            </label>
+                            <input type="text" name="name" id="name" required
+                                   value="{{ agent.name if agent else '' }}"
+                                   class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                   placeholder="My Agent">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="provider" class="block text-sm font-medium text-gray-700">
+                                    Provider
+                                </label>
+                                <select name="provider" id="provider" required
+                                        hx-get="/ui/htmx/models"
+                                        hx-target="#model_id"
+                                        hx-trigger="change"
+                                        hx-swap="innerHTML"
+                                        hx-vals="js:{provider: document.getElementById('provider').value}"
+                                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value="">Select provider...</option>
+                                    {% for p in providers %}
+                                    <option value="{{ p.id }}" {% if agent and agent.provider == p.id %}selected{% endif %}>
+                                        {{ p.name }} ({{ p.model_count }} models)
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="model_id" class="block text-sm font-medium text-gray-700">
+                                    Model
+                                </label>
+                                <select name="model_id" id="model_id" required
+                                        hx-get="/ui/htmx/model-constraints"
+                                        hx-target="#model-constraints"
+                                        hx-trigger="change"
+                                        hx-swap="innerHTML"
+                                        hx-vals="js:{model_id: document.getElementById('model_id').value, provider: document.getElementById('provider').value}"
+                                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        onchange="document.getElementById('model-constraints').classList.remove('hidden');">
+                                    {% if models %}
+                                    <option value="">Select model...</option>
+                                    {% for model in models %}
+                                    <option value="{{ model.id if model.id else model }}" {% if agent and agent.model_id == (model.id if model.id else model) %}selected{% endif %}>
+                                        {{ model.name if model.name else model }}
+                                    </option>
+                                    {% endfor %}
+                                    {% else %}
+                                    <option value="">Select a provider first...</option>
+                                    {% endif %}
+                                </select>
+                                <p class="mt-1 text-sm text-gray-500">Select a provider to see available models.</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="role" class="block text-sm font-medium text-gray-700">
+                                Role
+                            </label>
+                            <input type="text" name="role" id="role" required
+                                   value="{{ agent.role if agent else '' }}"
+                                   class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                   placeholder="Senior Software Engineer">
+                        </div>
+                        
+                        <div>
+                            <label for="goal" class="block text-sm font-medium text-gray-700">
+                                Goal
+                            </label>
+                            <textarea name="goal" id="goal" rows="3"
+                                      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                      placeholder="Help users write clean, efficient code...">{{ agent.goal if agent else '' }}</textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="backstory" class="block text-sm font-medium text-gray-700">
+                                Backstory
+                            </label>
+                            <textarea name="backstory" id="backstory" rows="4"
+                                      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                      placeholder="You are an experienced developer with expertise in...">{{ agent.backstory if agent else '' }}</textarea>
+                            <p class="mt-1 text-sm text-gray-500">Background context that shapes the agent's behavior.</p>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input type="checkbox" name="enable_memory" id="enable_memory"
+                                       {% if agent and agent.enable_memory %}checked{% endif %}
+                                       class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="enable_memory" class="font-medium text-gray-700">Enable Memory</label>
+                                <p class="text-gray-500">Allow the agent to remember context across conversations.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Sampling Parameters Section -->
+                        <div class="border-t border-gray-200 pt-6">
+                            <h4 class="text-md font-medium text-gray-900 mb-4">Model Parameters</h4>
+                            <p class="text-sm text-gray-500 mb-4">Configure how the model generates responses. These settings affect creativity, output length, and reasoning capabilities.</p>
+                            
+                            <div id="model-constraints" class="mb-4 p-3 bg-blue-50 rounded-md text-sm text-blue-700 hidden">
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span id="constraints-text">Model constraints will appear here when you select a model.</span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                <div>
+                                    <label for="temperature" class="block text-sm font-medium text-gray-700">
+                                        Temperature
+                                    </label>
+                                    <input type="number" name="temperature" id="temperature"
+                                           value="{{ agent.sampling_params.temperature if agent and agent.sampling_params and agent.sampling_params.temperature is not none else '' }}"
+                                           min="0" max="2" step="0.1"
+                                           placeholder="0.7"
+                                           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                    <p class="mt-1 text-xs text-gray-500">Controls randomness (0=focused, 2=creative). Leave empty for model default.</p>
+                                </div>
+                                
+                                <div>
+                                    <label for="max_tokens" class="block text-sm font-medium text-gray-700">
+                                        Max Output Tokens
+                                    </label>
+                                    <input type="number" name="max_tokens" id="max_tokens"
+                                           value="{{ agent.sampling_params.max_tokens if agent and agent.sampling_params and agent.sampling_params.max_tokens else '' }}"
+                                           min="1" step="1"
+                                           placeholder="4096"
+                                           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                    <p class="mt-1 text-xs text-gray-500">Maximum tokens in response. Leave empty for model default.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-4">
+                                <div>
+                                    <label for="top_p" class="block text-sm font-medium text-gray-700">
+                                        Top P (Nucleus Sampling)
+                                    </label>
+                                    <input type="number" name="top_p" id="top_p"
+                                           value="{{ agent.sampling_params.top_p if agent and agent.sampling_params and agent.sampling_params.top_p is not none else '' }}"
+                                           min="0" max="1" step="0.05"
+                                           placeholder="0.9"
+                                           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                    <p class="mt-1 text-xs text-gray-500">Consider tokens with cumulative probability. Leave empty for model default.</p>
+                                </div>
+                                
+                                <div>
+                                    <label for="reasoning_effort" class="block text-sm font-medium text-gray-700">
+                                        Reasoning Effort
+                                    </label>
+                                    <select name="reasoning_effort" id="reasoning_effort"
+                                            class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                        <option value="">Default (model decides)</option>
+                                        <option value="low" {% if agent and agent.sampling_params and agent.sampling_params.reasoning_effort == 'low' %}selected{% endif %}>Low - Quick responses</option>
+                                        <option value="medium" {% if agent and agent.sampling_params and agent.sampling_params.reasoning_effort == 'medium' %}selected{% endif %}>Medium - Balanced</option>
+                                        <option value="high" {% if agent and agent.sampling_params and agent.sampling_params.reasoning_effort == 'high' %}selected{% endif %}>High - Deep reasoning</option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">For models with reasoning capabilities (o1, Claude with extended thinking).</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-4">
+                                <div>
+                                    <label for="presence_penalty" class="block text-sm font-medium text-gray-700">
+                                        Presence Penalty
+                                    </label>
+                                    <input type="number" name="presence_penalty" id="presence_penalty"
+                                           value="{{ agent.sampling_params.presence_penalty if agent and agent.sampling_params and agent.sampling_params.presence_penalty is not none else '' }}"
+                                           min="-2" max="2" step="0.1"
+                                           placeholder="0"
+                                           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                    <p class="mt-1 text-xs text-gray-500">Penalize new topics (-2 to 2). Positive = more variety.</p>
+                                </div>
+                                
+                                <div>
+                                    <label for="frequency_penalty" class="block text-sm font-medium text-gray-700">
+                                        Frequency Penalty
+                                    </label>
+                                    <input type="number" name="frequency_penalty" id="frequency_penalty"
+                                           value="{{ agent.sampling_params.frequency_penalty if agent and agent.sampling_params and agent.sampling_params.frequency_penalty is not none else '' }}"
+                                           min="-2" max="2" step="0.1"
+                                           placeholder="0"
+                                           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                    <p class="mt-1 text-xs text-gray-500">Penalize repetition (-2 to 2). Positive = less repetition.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label for="seed" class="block text-sm font-medium text-gray-700">
+                                    Seed (for reproducibility)
+                                </label>
+                                <input type="number" name="seed" id="seed"
+                                       value="{{ agent.sampling_params.seed if agent and agent.sampling_params and agent.sampling_params.seed else '' }}"
+                                       min="0" step="1"
+                                       placeholder="Leave empty for random"
+                                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md sm:w-1/2">
+                                <p class="mt-1 text-xs text-gray-500">Set a seed for deterministic outputs (if supported by the model).</p>
+                            </div>
+                        </div>
+                        
+                        <div id="form-result"></div>
+                    </div>
+                    
+                    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 space-x-3">
+                        <a href="/ui/agents" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <span class="htmx-indicator mr-2">
+                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                            {% if is_new %}Create{% else %}Save{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

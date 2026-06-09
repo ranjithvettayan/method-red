@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Export/Import - Red Team MCP{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Export/Import Configuration</h1>
+    
+    <div class="grid gap-6 md:grid-cols-2">
+        <!-- Export Section -->
+        <div class="bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    📥 Export Configuration
+                </h3>
+                <div class="mt-2 max-w-xl text-sm text-gray-500">
+                    <p>Download your current configuration including all agents, teams, and settings as a JSON file.</p>
+                </div>
+                <div class="mt-5">
+                    <a href="/ui/htmx/export/download"
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Download Export
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Import Section -->
+        <div class="bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    📤 Import Configuration
+                </h3>
+                <div class="mt-2 max-w-xl text-sm text-gray-500">
+                    <p>Upload a JSON configuration file to replace your current configuration.</p>
+                </div>
+                <form hx-post="/ui/htmx/import"
+                      hx-target="#import-result"
+                      hx-swap="innerHTML"
+                      hx-encoding="multipart/form-data"
+                      class="mt-5">
+                    <div class="flex items-center space-x-4">
+                        <input type="file" name="file" accept=".json" required
+                               class="block w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-md file:border-0
+                                      file:text-sm file:font-medium
+                                      file:bg-indigo-50 file:text-indigo-700
+                                      hover:file:bg-indigo-100">
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Import
+                        </button>
+                    </div>
+                </form>
+                <div id="import-result" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- YAML Migration Info -->
+    <div class="mt-6 bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                📄 YAML Migration
+            </h3>
+            <div class="mt-2 max-w-xl text-sm text-gray-500">
+                <p>
+                    If you have an existing <code class="bg-gray-100 px-1 rounded">config/config.yaml</code> file,
+                    it will be automatically imported on first run. The YAML file is kept as a backup.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Format Info -->
+    <div class="mt-6 bg-white shadow sm:rounded-lg overflow-hidden">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                Export Format
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                The export file follows this JSON structure:
+            </p>
+        </div>
+        <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <pre class="bg-gray-50 p-4 rounded-md text-sm overflow-x-auto"><code>{
+  "version": "1.0",
+  "exported_at": "2024-01-15T10:30:00Z",
+  "settings": {
+    "default_model": "claude-sonnet-4-20250514",
+    "default_provider": "anthropic",
+    "log_level": "INFO"
+  },
+  "agents": [
+    {
+      "id": "researcher",
+      "name": "Research Agent",
+      "model_id": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "role": "Senior Researcher",
+      "goal": "Find and analyze information",
+      "backstory": "Expert at research...",
+      "enable_memory": true,
+      "sampling_params": {}
+    }
+  ],
+  "teams": [
+    {
+      "id": "research_team",
+      "name": "Research Team",
+      "description": "A team of researchers",
+      "default_mode": "coordinate",
+      "members": ["researcher", "analyst"]
+    }
+  ]
+}</code></pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Red Team MCP{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="md:grid md:grid-cols-3 md:gap-6">
+        <div class="md:col-span-1">
+            <div class="px-4 sm:px-0">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Settings</h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    Configure system-wide settings and manage authentication.
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-5 md:mt-0 md:col-span-2">
+            {% if error %}
+            <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <!-- Settings Form -->
+            <form hx-post="/ui/htmx/settings"
+                  hx-target="#settings-result"
+                  hx-swap="innerHTML">
+                <div class="shadow sm:rounded-md sm:overflow-hidden">
+                    <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                        <h4 class="text-md font-medium text-gray-900">General Settings</h4>
+                        
+                        <div>
+                            <label for="default_provider" class="block text-sm font-medium text-gray-700">
+                                Default Provider
+                            </label>
+                            <select name="default_provider" id="default_provider"
+                                    hx-get="/ui/htmx/models"
+                                    hx-target="#default_model"
+                                    hx-trigger="change"
+                                    hx-swap="innerHTML"
+                                    hx-vals="js:{provider: document.getElementById('default_provider').value}"
+                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">Select provider...</option>
+                                {% for p in providers %}
+                                <option value="{{ p.id }}" {% if settings.get('default_provider') == p.id %}selected{% endif %}>
+                                    {{ p.name }} ({{ p.model_count }} models)
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="default_model" class="block text-sm font-medium text-gray-700">
+                                Default Model
+                            </label>
+                            <select name="default_model" id="default_model"
+                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                {% if settings.get('default_model') %}
+                                <option value="{{ settings.get('default_model') }}" selected>{{ settings.get('default_model') }}</option>
+                                {% else %}
+                                <option value="">Select a provider first...</option>
+                                {% endif %}
+                            </select>
+                            <p class="mt-1 text-sm text-gray-500">Select a provider to see available models.</p>
+                        </div>
+                        
+                        <div>
+                            <label for="log_level" class="block text-sm font-medium text-gray-700">
+                                Log Level
+                            </label>
+                            <select name="log_level" id="log_level"
+                                    class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="DEBUG" {% if settings.get('log_level') == 'DEBUG' %}selected{% endif %}>DEBUG</option>
+                                <option value="INFO" {% if settings.get('log_level', 'INFO') == 'INFO' %}selected{% endif %}>INFO</option>
+                                <option value="WARNING" {% if settings.get('log_level') == 'WARNING' %}selected{% endif %}>WARNING</option>
+                                <option value="ERROR" {% if settings.get('log_level') == 'ERROR' %}selected{% endif %}>ERROR</option>
+                            </select>
+                        </div>
+                        
+                        <div id="settings-result"></div>
+                    </div>
+                    
+                    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                        <button type="submit"
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Token Management -->
+            <div class="mt-6 shadow sm:rounded-md sm:overflow-hidden">
+                <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                    <h4 class="text-md font-medium text-gray-900">API Token</h4>
+                    <p class="text-sm text-gray-500">
+                        This token is used for API authentication and the admin UI.
+                        Regenerating it will invalidate the current token.
+                    </p>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <span class="text-xl">⚠️</span>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">
+                                    Caution
+                                </h3>
+                                <div class="mt-2 text-sm text-yellow-700">
+                                    <p>
+                                        Regenerating your token will require you to update all clients 
+                                        and re-login to this UI.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="token-result"></div>
+                    
+                    <button hx-post="/ui/htmx/token/regenerate"
+                            hx-target="#token-result"
+                            hx-swap="innerHTML"
+                            hx-confirm="Are you sure? This will invalidate your current token."
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        Regenerate Token
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Database Reset -->
+            <div class="mt-6 shadow sm:rounded-md sm:overflow-hidden">
+                <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                    <h4 class="text-md font-medium text-gray-900">Danger Zone</h4>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <span class="text-xl">🚨</span>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">
+                                    Reset Database
+                                </h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>
+                                        This will delete all agents, teams, and settings. 
+                                        This action cannot be undone.
+                                    </p>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="button"
+                                            onclick="if(confirm('Type RESET to confirm') === 'RESET') { fetch('/api/v1/reset', {method: 'POST', headers: {'Authorization': 'Bearer ' + document.cookie.match(/mcp_token=([^;]+)/)[1]}}).then(() => window.location.reload()); }"
+                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        Reset Database
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

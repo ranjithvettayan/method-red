@@ -1,0 +1,35 @@
+title: AATMF T11 - Unauthorized Agent Tool Invocation
+id: aatmf-t11-001
+status: experimental
+description: Detects agent tool calls deviating from authorized patterns
+author: SnailSploit
+date: 2026/02/10
+references:
+    - https://github.com/snailsploit/aatmf
+tags:
+    - attack.execution
+    - aatmf.t11
+logsource:
+    category: agent_framework
+detection:
+    selection:
+        agent.tool_call.status: 'executed'
+    filter_shell:
+        agent.tool_call.name|contains:
+            - 'bash'
+            - 'shell'
+            - 'exec'
+            - 'system'
+    filter_network:
+        agent.tool_call.args|contains:
+            - 'http://'
+            - 'https://'
+            - 'curl'
+            - 'wget'
+    filter_file_write:
+        agent.tool_call.args|re: '(write|create|append|overwrite).*\.(sh|py|js|bat|ps1)'
+    condition: selection AND (filter_shell OR filter_network OR filter_file_write)
+level: critical
+falsepositives:
+    - Authorized development agents
+    - CI/CD pipeline agents

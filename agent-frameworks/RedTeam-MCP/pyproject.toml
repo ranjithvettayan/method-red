@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mRed Team MCP"
+version = "0.1.0"
+description = "Red Team MCP - provides configurable AI agents and multi-agent coordination"
+readme = "README.md"
+license = {text = "AGPL-3.0"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Red Team MCP Team", email = "team@example.com"},
+]
+maintainers = [
+    {name = "Red Team MCP Team", email = "team@example.com"},
+]
+keywords = ["mcp", "ai", "agents", "llm", "anthropic", "claude", "openai", "multi-agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "crewai",
+    "mcp>=0.1.0",
+    "anthropic",
+    "openai",
+    "python-dotenv",
+    "requests",
+    "pydantic",
+    "pyyaml",
+    "psutil",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/multi-llm-agent"
+Documentation = "https://github.com/yourusername/multi-llm-agent#readme"
+Repository = "https://github.com/yourusername/multi-llm-agent.git"
+Issues = "https://github.com/yourusername/multi-llm-agent/issues"
+Changelog = "https://github.com/yourusername/multi-llm-agent/blob/main/CHANGELOG.md"
+
+[project.scripts]
+mcp-server-multi-llm-agent = "src.mcp_server_dynamic:main"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+exclude = ["tests*", "docs*"]
+
+[tool.setuptools.package-data]
+"src" = ["config/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true

@@ -1,0 +1,72 @@
+<!-- History Table Partial -->
+{% set history = history if history is defined else recent_history %}
+
+{% if history %}
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead>
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Model</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tokens</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Response</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for entry in history %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {{ entry.created_at[:16].replace('T', ' ') if entry.created_at else 'N/A' }}
+                </td>
+                <td class="px-4 py-3">
+                    <div class="text-sm font-medium text-gray-900">{{ entry.model_id or 'Unknown' }}</div>
+                    <div class="text-xs text-gray-500">{{ entry.provider or '' }}</div>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-500">
+                    {{ entry.agent_id or '-' }}
+                </td>
+                <td class="px-4 py-3 text-right text-sm">
+                    <span class="text-blue-600">{{ "{:,}".format(entry.input_tokens|int) }}</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-green-600">{{ "{:,}".format(entry.output_tokens|int) }}</span>
+                </td>
+                <td class="px-4 py-3 text-right text-sm font-medium text-gray-900">
+                    ${{ "%.6f"|format(entry.total_cost) }}
+                </td>
+                <td class="px-4 py-3 text-right text-sm text-gray-500">
+                    {{ "%.0f"|format(entry.response_time_ms) }}ms
+                </td>
+                <td class="px-4 py-3 text-center">
+                    {% if entry.success %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        OK
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800" title="{{ entry.error_message or 'Unknown error' }}">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Error
+                    </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-8">
+    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <p class="mt-2 text-sm text-gray-500">No recent requests</p>
+    <p class="text-xs text-gray-400">Usage history will appear here as you use the API</p>
+</div>
+{% endif %}

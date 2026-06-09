@@ -1,0 +1,34 @@
+title: AATMF T5 - Model Extraction via API Abuse
+id: aatmf-t5-001
+status: experimental
+description: Detects systematic API querying patterns indicative of model extraction attempts
+author: SnailSploit
+date: 2026/02/10
+references:
+    - https://github.com/snailsploit/aatmf
+tags:
+    - attack.collection
+    - aatmf.t5
+logsource:
+    category: api_gateway
+    product: ai_inference
+detection:
+    selection:
+        api.endpoint|endswith:
+            - '/completions'
+            - '/chat/completions'
+            - '/generate'
+    filter_high_volume:
+        api.request_count_per_hour|gte: 500
+    filter_systematic:
+        api.input_similarity_window_5min|gte: 0.85
+    filter_boundary:
+        api.response|contains:
+            - 'error'
+            - 'rate_limit'
+            - 'max_tokens'
+    condition: selection AND (filter_high_volume OR filter_systematic OR filter_boundary)
+level: high
+falsepositives:
+    - Legitimate load testing
+    - Batch processing pipelines
